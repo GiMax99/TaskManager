@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -29,13 +29,13 @@ public class User {
     /**
      * Логин пользователя.
      */
-    @Column(name = "username", nullable = false, length = 255)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     /**
      * Электронная почта пользователя. Должна быть уникальной.
      */
-    @Column(name = "email", nullable = false, unique = true, length = 255)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     /**
@@ -89,5 +89,19 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

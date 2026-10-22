@@ -10,11 +10,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -35,7 +35,7 @@ public class Task {
     /**
      * Название задачи.
      */
-    @Column(name = "title", nullable = false, length = 255)
+    @Column(name = "title", nullable = false)
     private String title;
 
     /**
@@ -75,16 +75,40 @@ public class Task {
     /**
      * Дата создания задачи.
      */
-    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     /**
      * Дата обновления задачи.
      */
-    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Task task = (Task) o;
+        return Objects.equals(id, task.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 
     public UUID getId() {
         return id;
@@ -146,15 +170,7 @@ public class Task {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public Instant getUpdatedAt() {
         return updatedAt;
-    }
-
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

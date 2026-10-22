@@ -7,4 +7,5 @@
 
     <include file="db/changelog/changes/001-create-users-table.sql"/>
     <include file="db/changelog/changes/002-create-tasks-table.sql"/>
+    <include file="db/changelog/changes/003-add-unique-username.sql"/>
 </databaseChangeLog>
