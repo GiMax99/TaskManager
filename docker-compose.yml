@@ -1,0 +1,40 @@
+name: task-manager
+
+services:
+    postgres:
+        image: postgres:17-alpine
+        container_name: task-manager-postgres
+        profiles: [ "db", "full" ]
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB:-task_manager}
+            POSTGRES_USER: ${POSTGRES_USER:-task_manager}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-task_manager}
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    task-manager:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+        image: task-manager:local
+        container_name: task-manager-app
+        profiles: [ "full" ]
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-task_manager}
+            SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-task_manager}
+            SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-task_manager}
+        ports:
+            - "${APP_PORT:-8080}:8080"
+
+volumes:
+    postgres-data:
